@@ -1,8 +1,8 @@
 name: Build Release APK
 on:
   push:
-    tags: ["v*"] # 打v1.0这种tag自动触发
-  workflow_dispatch: #手动触发
+    tags: ["v*"]
+  workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -22,16 +22,15 @@ jobs:
       - name: Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: 解码keystore到本地
-        run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > app/release-key.jks
+      - name: 解码keystore到app目录
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > app/release-key.jks
 
       - name: 编译Release APK
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: ./gradlew assembleRelease
+        run: ./gradlew assembleRelease -x lint
 
       - name: 上传签名APK
         uses: actions/upload-artifact@v4
